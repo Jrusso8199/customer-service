@@ -9,24 +9,33 @@ import org.mockito.Mockito;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 
+import java.util.Arrays;
+
 public abstract class BaseContractTest {
 
-    @BeforeEach
-    public void setup() {
-        CustomerRepository repository = Mockito.mock(CustomerRepository.class);
-        CustomerController controller = new CustomerController(repository);
+    private CustomerRepository customerRepository;
+    private Customer customer;
 
-        // Set up test data
-        Customer customer = new Customer();
+    @BeforeEach
+    void setUp() {
+        customerRepository = Mockito.mock(CustomerRepository.class);
+        RestAssuredMockMvc.standaloneSetup(new CustomerController(customerRepository));
+
+        customer = new Customer();
         customer.setId(1L);
         customer.setFirstName("John");
         customer.setLastName("Doe");
         customer.setEmail("john.doe@example.com");
         customer.setPassword("password123");
 
-        Mockito.when(repository.save(Mockito.any(Customer.class))).thenReturn(customer);
+        Customer customer2 = new Customer();
+        customer2.setId(2L);
+        customer2.setFirstName("Jane");
+        customer2.setLastName("Doe");
+        customer2.setEmail("jane.doe@example.com");
+        customer2.setPassword("password456");
 
-        StandaloneMockMvcBuilder standaloneMockMvcBuilder = MockMvcBuilders.standaloneSetup(controller);
-        RestAssuredMockMvc.standaloneSetup(standaloneMockMvcBuilder);
+        Mockito.when(customerRepository.save(Mockito.any(Customer.class))).thenReturn(customer);
+        Mockito.when(customerRepository.findAll()).thenReturn(Arrays.asList(customer, customer2));
     }
 }
